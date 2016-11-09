@@ -45,6 +45,8 @@ bool SVG_IMPORT_PLUGIN::Load( const wxString& aFileName )
 
     for( NSVGshape* shape = image->shapes; shape != NULL; shape = shape->next )
     {
+        m_importer->SetLineWidth( shape->strokeWidth );
+
         for( NSVGpath* path = shape->paths; path != NULL; path = path->next )
             DrawPath( path->pts, path->npts, path->closed );
     }
