@@ -31,7 +31,8 @@
 
 using namespace std;
 
-static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints );
+static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints,
+        double aScaleFactor );
 
 void GRAPHICS_IMPORTER_PCBNEW::AddLine( const wxRealPoint& aOrigin, const wxRealPoint& aEnd )
 {
@@ -73,7 +74,7 @@ void GRAPHICS_IMPORTER_PCBNEW::AddArc( const wxRealPoint& aCenter, const wxRealP
 
 void GRAPHICS_IMPORTER_PCBNEW::AddPolygon( const std::vector< wxRealPoint >& aVertices )
 {
-    std::vector< wxPoint > convertedVertices = convertPoints( aVertices );
+    std::vector< wxPoint > convertedVertices = convertPoints( aVertices, GetScale() );
     unique_ptr<DRAWSEGMENT> polygon( createDrawing() );
     polygon->SetShape( S_POLYGON );
     polygon->SetLayer( GetLayer() );
@@ -128,12 +129,18 @@ pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_MODULE::createText() c
 }
 
 
-static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints )
+static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints,
+        double aScaleFactor )
 {
     std::vector< wxPoint > convertedPoints;
 
     for (const wxRealPoint& precisePoint : aPoints)
-        convertedPoints.emplace_back( precisePoint.x, precisePoint.y );
+    {
+        auto scaledX = precisePoint.x * aScaleFactor;
+        auto scaledY = precisePoint.y * aScaleFactor;
+
+        convertedPoints.emplace_back( scaledX, scaledY );
+    }
 
     return convertedPoints;
 }
