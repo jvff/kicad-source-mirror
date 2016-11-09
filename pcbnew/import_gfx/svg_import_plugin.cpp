@@ -121,14 +121,9 @@ void SVG_IMPORT_PLUGIN::DrawLinePath( const float* aPoints, int aNumPoints,
 }
 
 
-void SVG_IMPORT_PLUGIN::DrawPolygon( const std::vector< wxRealPoint >& aPrecisePoints )
+void SVG_IMPORT_PLUGIN::DrawPolygon( const std::vector< wxRealPoint >& aPoints )
 {
-    std::vector< wxPoint > convertedPoints( aPrecisePoints.size() );
-
-    for( const wxRealPoint& point : aPrecisePoints )
-        convertedPoints.emplace_back( point.x, point.y );
-
-    m_importer->AddPolygon( convertedPoints );
+    m_importer->AddPolygon( aPoints );
 }
 
 

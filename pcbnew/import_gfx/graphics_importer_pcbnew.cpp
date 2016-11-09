@@ -31,7 +31,9 @@
 
 using namespace std;
 
-void GRAPHICS_IMPORTER_PCBNEW::AddLine( const wxPoint& aOrigin, const wxPoint& aEnd )
+static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints );
+
+void GRAPHICS_IMPORTER_PCBNEW::AddLine( const wxRealPoint& aOrigin, const wxRealPoint& aEnd )
 {
     unique_ptr<DRAWSEGMENT> line( createDrawing() );
     line->SetShape( S_SEGMENT );
@@ -43,19 +45,20 @@ void GRAPHICS_IMPORTER_PCBNEW::AddLine( const wxPoint& aOrigin, const wxPoint& a
 }
 
 
-void GRAPHICS_IMPORTER_PCBNEW::AddCircle( const wxPoint& aCenter, unsigned int aRadius )
+void GRAPHICS_IMPORTER_PCBNEW::AddCircle( const wxRealPoint& aCenter, unsigned int aRadius )
 {
     unique_ptr<DRAWSEGMENT> circle( createDrawing() );
     circle->SetShape( S_CIRCLE );
     circle->SetLayer( GetLayer() );
     circle->SetWidth( GetLineWidth() );
     circle->SetCenter( aCenter * GetScale() );
-    circle->SetArcStart( wxPoint( aCenter.x + aRadius, aCenter.y ) * GetScale() );
+    circle->SetArcStart( wxRealPoint( aCenter.x + aRadius, aCenter.y ) * GetScale() );
     addItem( std::move( circle ) );
 }
 
 
-void GRAPHICS_IMPORTER_PCBNEW::AddArc( const wxPoint& aCenter, const wxPoint& aStart, double aAngle )
+void GRAPHICS_IMPORTER_PCBNEW::AddArc( const wxRealPoint& aCenter, const wxRealPoint& aStart,
+        double aAngle )
 {
     unique_ptr<DRAWSEGMENT> arc( createDrawing() );
     arc->SetShape( S_ARC );
@@ -68,17 +71,18 @@ void GRAPHICS_IMPORTER_PCBNEW::AddArc( const wxPoint& aCenter, const wxPoint& aS
 }
 
 
-void GRAPHICS_IMPORTER_PCBNEW::AddPolygon( const std::vector< wxPoint >& aVertices )
+void GRAPHICS_IMPORTER_PCBNEW::AddPolygon( const std::vector< wxRealPoint >& aVertices )
 {
+    std::vector< wxPoint > convertedVertices = convertPoints( aVertices );
     unique_ptr<DRAWSEGMENT> polygon( createDrawing() );
     polygon->SetShape( S_POLYGON );
     polygon->SetLayer( GetLayer() );
-    polygon->SetPolyPoints( aVertices );
+    polygon->SetPolyPoints( convertedVertices );
     addItem( std::move( polygon ) );
 }
 
 
-void GRAPHICS_IMPORTER_PCBNEW::AddText( const wxPoint& aOrigin, const wxString& aText,
+void GRAPHICS_IMPORTER_PCBNEW::AddText( const wxRealPoint& aOrigin, const wxString& aText,
         unsigned int aHeight, unsigned aWidth, double aOrientation,
         EDA_TEXT_HJUSTIFY_T aHJustify, EDA_TEXT_VJUSTIFY_T aVJustify )
 {
@@ -121,4 +125,15 @@ pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_MODULE::createText() c
 {
     TEXTE_MODULE* text = new TEXTE_MODULE( nullptr );
     return make_pair( unique_ptr<BOARD_ITEM>( text ), static_cast<EDA_TEXT*>( text ) );
+}
+
+
+static std::vector< wxPoint > convertPoints( const std::vector< wxRealPoint >& aPoints )
+{
+    std::vector< wxPoint > convertedPoints;
+
+    for (const wxRealPoint& precisePoint : aPoints)
+        convertedPoints.emplace_back( precisePoint.x, precisePoint.y );
+
+    return convertedPoints;
 }
