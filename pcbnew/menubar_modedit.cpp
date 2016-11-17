@@ -127,10 +127,10 @@ void FOOTPRINT_EDIT_FRAME::ReCreateMenuBar()
                  _( "Save currently loaded footprint into file" ),
                  KiBitmap( export_module_xpm ) );
 
-    // Import DXF File
-    AddMenuItem( fileMenu, ID_GEN_IMPORT_DXF_FILE,
-                 _( "&Import DXF File" ),
-                 _( "Import a 2D Drawing DXF file to Pcbnew on the Drawings layer" ),
+    // Import vector graphics
+    AddMenuItem( fileMenu, ID_GEN_IMPORT_GRAPHICS,
+                 _( "&Import graphics" ),
+                 _( "Import a 2D vector graphics file to Pcbnew on the Drawings layer" ),
                  KiBitmap( import_xpm ) );
 
     fileMenu->AppendSeparator();

@@ -667,7 +667,7 @@ boost::optional<TOOL_EVENT> COMMON_ACTIONS::TranslateLegacyId( int aId )
     case ID_MODEDIT_PAD_TOOL:
         return COMMON_ACTIONS::placePad.MakeEvent();
 
-    case ID_GEN_IMPORT_DXF_FILE:
+    case ID_GEN_IMPORT_GRAPHICS:
         return COMMON_ACTIONS::placeGraphics.MakeEvent();
 
     case ID_MODEDIT_ANCHOR_TOOL:

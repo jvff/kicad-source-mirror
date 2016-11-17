@@ -190,7 +190,7 @@ void PCB_EDIT_FRAME::ReCreateMenuBar()
                  _( "Import a routed \"Specctra Session\" (*.ses) file" ),
                  KiBitmap( import_xpm ) );
 
-    AddMenuItem( submenuImport, ID_GEN_IMPORT_DXF_FILE,
+    AddMenuItem( submenuImport, ID_GEN_IMPORT_GRAPHICS,
                  _( "&Graphics" ),
                  _( "Import a 2D Vector Graphics File" ),
                  KiBitmap( import_xpm ) );
