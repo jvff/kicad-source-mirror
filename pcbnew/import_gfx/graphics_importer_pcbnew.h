@@ -30,6 +30,8 @@
 #include <layers_id_colors_and_visibility.h>
 
 class BOARD_ITEM;
+class BOARD;
+class MODULE;
 class DRAWSEGMENT;
 class EDA_TEXT;
 
@@ -72,11 +74,11 @@ public:
 
 protected:
     ///> Create an object representing a graphical shape.
-    virtual std::unique_ptr<DRAWSEGMENT> createDrawing() const = 0;
+    virtual std::unique_ptr<DRAWSEGMENT> createDrawing() = 0;
 
     ///> Create an object representing a text. Both pointers point to different parts of the
     ///> same object, the EDA_TEXT pointer is simply for convenience.
-    virtual std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() const = 0;
+    virtual std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() = 0;
 
     ///> Target layer for the imported shapes.
     LAYER_ID m_layer;
@@ -85,17 +87,33 @@ protected:
 
 class GRAPHICS_IMPORTER_BOARD : public GRAPHICS_IMPORTER_PCBNEW
 {
+public:
+    GRAPHICS_IMPORTER_BOARD( BOARD* aBoard )
+        : m_board( aBoard )
+    {
+    }
+
 protected:
-    std::unique_ptr<DRAWSEGMENT> createDrawing() const override;
-    std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() const override;
+    std::unique_ptr<DRAWSEGMENT> createDrawing() override;
+    std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() override;
+
+    BOARD* m_board;
 };
 
 
 class GRAPHICS_IMPORTER_MODULE : public GRAPHICS_IMPORTER_PCBNEW
 {
+public:
+    GRAPHICS_IMPORTER_MODULE( MODULE* aModule )
+        : m_module( aModule )
+    {
+    }
+
 protected:
-    std::unique_ptr<DRAWSEGMENT> createDrawing() const override;
-    std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() const override;
+    std::unique_ptr<DRAWSEGMENT> createDrawing() override;
+    std::pair<std::unique_ptr<BOARD_ITEM>, EDA_TEXT*> createText() override;
+
+    MODULE* m_module;
 };
 
 #endif /* GRAPHICS_IMPORTER_PCBNEW */

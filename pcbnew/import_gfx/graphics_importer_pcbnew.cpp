@@ -24,6 +24,7 @@
 
 #include "graphics_importer_pcbnew.h"
 
+#include <class_board.h>
 #include <class_edge_mod.h>
 #include <class_pcb_text.h>
 #include <class_text_mod.h>
@@ -31,13 +32,15 @@
 
 using namespace std;
 
-static std::vector< wxPoint > convertPoints( const std::vector< VECTOR2D >& aPoints,
+static std::vector<wxPoint> convertPoints( const std::vector<VECTOR2D>& aPoints,
         double aScaleFactor );
 
-static wxPoint Round ( const VECTOR2D& aVec )
+
+static wxPoint Round( const VECTOR2D& aVec )
 {
-    return wxPoint ( (int) aVec.x, (int) aVec.y );
+    return wxPoint( (int) aVec.x, (int) aVec.y );
 }
+
 
 void GRAPHICS_IMPORTER_PCBNEW::AddLine( const VECTOR2D& aOrigin, const VECTOR2D& aEnd )
 {
@@ -107,38 +110,39 @@ void GRAPHICS_IMPORTER_PCBNEW::AddText( const VECTOR2D& aOrigin, const wxString&
 }
 
 
-unique_ptr<DRAWSEGMENT> GRAPHICS_IMPORTER_BOARD::createDrawing() const
+unique_ptr<DRAWSEGMENT> GRAPHICS_IMPORTER_BOARD::createDrawing()
 {
-    return unique_ptr<DRAWSEGMENT>( new DRAWSEGMENT() );
+    return unique_ptr<DRAWSEGMENT>( new DRAWSEGMENT( m_board ) );
 }
 
 
-pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_BOARD::createText() const
+pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_BOARD::createText()
 {
-    TEXTE_PCB* text = new TEXTE_PCB( nullptr );
+    TEXTE_PCB* text = new TEXTE_PCB( m_board );
     return make_pair( unique_ptr<BOARD_ITEM>( text ), static_cast<EDA_TEXT*>( text ) );
 }
 
 
-unique_ptr<DRAWSEGMENT> GRAPHICS_IMPORTER_MODULE::createDrawing() const
+unique_ptr<DRAWSEGMENT> GRAPHICS_IMPORTER_MODULE::createDrawing()
 {
-    return unique_ptr<DRAWSEGMENT>( new EDGE_MODULE( nullptr ) );
+    return unique_ptr<DRAWSEGMENT>( new EDGE_MODULE( m_module ) );
 }
 
 
-pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_MODULE::createText() const
+pair<unique_ptr<BOARD_ITEM>, EDA_TEXT*> GRAPHICS_IMPORTER_MODULE::createText()
 {
-    TEXTE_MODULE* text = new TEXTE_MODULE( nullptr );
+    TEXTE_MODULE* text = new TEXTE_MODULE( m_module );
     return make_pair( unique_ptr<BOARD_ITEM>( text ), static_cast<EDA_TEXT*>( text ) );
 }
 
 
-static std::vector< wxPoint > convertPoints( const std::vector< VECTOR2D >& aPoints,
+static std::vector< wxPoint > convertPoints( const std::vector<VECTOR2D>& aPoints,
         double aScaleFactor )
 {
-    std::vector< wxPoint > convertedPoints;
+    std::vector<wxPoint> convertedPoints;
+    convertedPoints.reserve( aPoints.size() );
 
-    for (const VECTOR2D& precisePoint : aPoints)
+    for( const VECTOR2D& precisePoint : aPoints )
     {
         auto scaledX = precisePoint.x * aScaleFactor;
         auto scaledY = precisePoint.y * aScaleFactor;

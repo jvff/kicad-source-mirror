@@ -63,9 +63,9 @@ DIALOG_IMPORT_GFX::DIALOG_IMPORT_GFX( PCB_BASE_FRAME* aParent, bool aUseModuleIt
     m_parent = aParent;
 
     if( aUseModuleItems )
-        m_importer.reset( new GRAPHICS_IMPORTER_MODULE() );
+        m_importer.reset( new GRAPHICS_IMPORTER_MODULE( m_parent->GetBoard()->m_Modules ) );
     else
-        m_importer.reset( new GRAPHICS_IMPORTER_BOARD() );
+        m_importer.reset( new GRAPHICS_IMPORTER_BOARD( m_parent->GetBoard() ) );
 
     m_config = Kiface().KifaceSettings();
     m_gridUnits = 0;
