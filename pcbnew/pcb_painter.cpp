@@ -757,10 +757,10 @@ void PCB_PAINTER::draw( const DRAWSEGMENT* aSegment, int aLayer )
         m_gal->SetIsFill( true );
         m_gal->SetIsStroke( false );
         m_gal->SetFillColor( color );
-
         m_gal->Save();
 
         MODULE* module = aSegment->GetParentModule();
+
         if( module )
         {
             m_gal->Translate( module->GetPosition() );
@@ -768,18 +768,19 @@ void PCB_PAINTER::draw( const DRAWSEGMENT* aSegment, int aLayer )
         }
         else
         {
-            // not tested
-            m_gal->Translate( aSegment->GetPosition() );
+            //m_gal->Translate( aSegment->GetPosition() );
             m_gal->Rotate( -aSegment->GetAngle() * M_PI / 1800.0 );
         }
 
+        // Convert wxPoints to VECTOR2Ds
         std::copy( aSegment->GetPolyPoints().begin(), aSegment->GetPolyPoints().end(),
                    std::back_inserter( pointsList ) );
 
         m_gal->SetLineWidth( aSegment->GetWidth() );
+
+        // Draw the outline to have rounded corners
         m_gal->DrawPolyline( pointsList );
         m_gal->DrawPolygon( pointsList );
-
         m_gal->Restore();
         break;
     }

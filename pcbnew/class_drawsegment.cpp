@@ -64,6 +64,19 @@ DRAWSEGMENT::~DRAWSEGMENT()
 }
 
 
+void DRAWSEGMENT::Move( const wxPoint& aMoveVector )
+{
+    if( m_Shape == S_POLYGON )
+    {
+        for( auto& pt : m_PolyPoints )
+            pt += aMoveVector;
+    }
+
+    m_Start += aMoveVector;
+    m_End   += aMoveVector;
+}
+
+
 void DRAWSEGMENT::Rotate( const wxPoint& aRotCentre, double aAngle )
 {
     switch( m_Shape )
@@ -114,6 +127,21 @@ void DRAWSEGMENT::Flip( const wxPoint& aCentre )
     // copper layers count is not taken in accoun in Flip transform
     SetLayer( FlipLayer( GetLayer() ) );
 }
+
+
+void DRAWSEGMENT::SetStart( const wxPoint& aStart )
+{
+    if( m_Shape == S_POLYGON )
+    {
+        wxPoint delta = aStart - m_Start;
+
+        for( auto& pt : m_PolyPoints )
+            pt += delta;
+    }
+
+    m_Start = aStart;
+}
+
 
 const wxPoint DRAWSEGMENT::GetCenter() const
 {
@@ -194,7 +222,7 @@ MODULE* DRAWSEGMENT::GetParentModule() const
 {
     if ( !m_Parent )
         return NULL;
-        
+
     if( m_Parent->Type() != PCB_MODULE_T )
         return NULL;
 
@@ -315,6 +343,17 @@ void DRAWSEGMENT::Draw( EDA_DRAW_PANEL* panel, wxDC* DC, GR_DRAWMODE draw_mode,
 
         break;
 
+    case S_POLYGON:
+        GRPoly( panel->GetClipBox(), DC, m_PolyPoints.size(),
+                &m_PolyPoints[0], true, m_Width, color, color );
+        //for( unsigned int i = 1; i < m_PolyPoints.size(); ++i )
+        //{
+            //GRFilledSegment( panel->GetClipBox(), DC,
+                    //m_PolyPoints[i - 1], m_PolyPoints[i], m_Width, color );
+        //}
+
+        break;
+
     default:
         if( filled )
         {
@@ -408,7 +447,10 @@ const EDA_RECT DRAWSEGMENT::GetBoundingBox() const
 
     case S_POLYGON:
     {
-        wxPoint p_end;
+        if( m_PolyPoints.empty() )
+            break;
+
+        wxPoint p_origin, p_end;
         MODULE* module = GetParentModule();
 
         for( unsigned ii = 0; ii < m_PolyPoints.size(); ii++ )
@@ -422,23 +464,27 @@ const EDA_RECT DRAWSEGMENT::GetBoundingBox() const
             }
 
             if( ii == 0 )
+            {
+                p_origin = pt;
                 p_end = pt;
+            }
 
-            bbox.SetX( std::min( bbox.GetX(), pt.x ) );
-            bbox.SetY( std::min( bbox.GetY(), pt.y ) );
-            p_end.x   = std::max( p_end.x, pt.x );
-            p_end.y   = std::max( p_end.y, pt.y );
+            p_origin.x = std::min( p_origin.x, pt.x );
+            p_origin.y = std::min( p_origin.y, pt.y );
+            p_end.x    = std::max( p_end.x, pt.x );
+            p_end.y    = std::max( p_end.y, pt.y );
         }
 
+        bbox.SetOrigin( p_origin );
         bbox.SetEnd( p_end );
     }
         break;
 
     default:
-        ;
+        break;
     }
 
-    bbox.Inflate( ((m_Width+1) / 2) + 1 );
+    bbox.Inflate( ( ( m_Width + 1 ) / 2 ) + 1 );
     bbox.Normalize();
 
     return bbox;
@@ -496,7 +542,7 @@ bool DRAWSEGMENT::HitTest( const wxPoint& aPosition ) const
     case S_CURVE:
         for( unsigned int i= 1; i < m_BezierPoints.size(); i++)
         {
-            if( TestSegmentHit( aPosition, m_BezierPoints[i-1], m_BezierPoints[i-1], m_Width / 2 ) )
+            if( TestSegmentHit( aPosition, m_BezierPoints[i-1], m_BezierPoints[i], m_Width / 2 ) )
                 return true;
         }
         break;
@@ -506,7 +552,12 @@ bool DRAWSEGMENT::HitTest( const wxPoint& aPosition ) const
             return true;
         break;
 
-    case S_POLYGON:     // not yet handled
+    case S_POLYGON:
+        for( unsigned int i = 1; i < m_PolyPoints.size(); i++ )
+        {
+            if( TestSegmentHit( aPosition, m_PolyPoints[i - 1], m_PolyPoints[i], m_Width / 2 ) )
+                return true;
+        }
         break;
 
     default:
@@ -563,8 +614,26 @@ bool DRAWSEGMENT::HitTest( const EDA_RECT& aRect, bool aContained, int aAccuracy
 
         break;
 
-    case S_CURVE:
-    case S_POLYGON:     // not yet handled
+    case S_POLYGON:
+        if( aContained )
+        {
+            for( unsigned int i = 1; i < m_PolyPoints.size(); i++ )
+            {
+                if( arect.Contains( m_PolyPoints[i - 1] ) && aRect.Contains( m_PolyPoints[i] ) )
+                    return true;
+            }
+        }
+        else
+        {
+            for( unsigned int i = 1; i < m_PolyPoints.size(); i++ )
+            {
+                if( arect.Intersects( m_PolyPoints[i - 1], m_PolyPoints[i] ) )
+                    return true;
+            }
+        }
+        break;
+
+    case S_CURVE:     // not yet handled
         break;
 
     default:

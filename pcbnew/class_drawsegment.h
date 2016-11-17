@@ -98,7 +98,7 @@ public:
     void SetBezControl2( const wxPoint& aPoint )    { m_BezierC2 = aPoint; }
     const wxPoint& GetBezControl2() const           { return m_BezierC2; }
 
-    void SetPosition( const wxPoint& aPos ) override { m_Start = aPos; }
+    void SetPosition( const wxPoint& aPos ) override { SetStart( aPos ); }
     const wxPoint& GetPosition() const override     { return m_Start; }
 
     /**
@@ -106,9 +106,9 @@ public:
      * returns the starting point of the graphic
      */
     const wxPoint& GetStart() const         { return m_Start; }
-    void SetStart( const wxPoint& aStart )  { m_Start = aStart; }
-    void SetStartY( int y )                 { m_Start.y = y; }
-    void SetStartX( int x )                 { m_Start.x = x; }
+    void SetStart( const wxPoint& aStart );
+    void SetStartY( int y ) { SetStart( wxPoint( m_Start.x, y ) ); }
+    void SetStartX( int x ) { SetStart( wxPoint( x, m_Start.y ) ); }
 
     /**
      * Function GetEnd
@@ -177,6 +177,9 @@ public:
     void SetPolyPoints( const std::vector<wxPoint>& aPoints )
     {
         m_PolyPoints = aPoints;
+
+        if( !m_PolyPoints.empty() )
+            m_Start = m_PolyPoints[0];
     }
 
     void Draw( EDA_DRAW_PANEL* panel, wxDC* DC,
@@ -208,11 +211,7 @@ public:
         return GetLineLength( GetStart(), GetEnd() );
     }
 
-    virtual void Move( const wxPoint& aMoveVector ) override
-    {
-        m_Start += aMoveVector;
-        m_End   += aMoveVector;
-    }
+    virtual void Move( const wxPoint& aMoveVector ) override;
 
     virtual void Rotate( const wxPoint& aRotCentre, double aAngle ) override;
 
