@@ -518,7 +518,7 @@ int DRAWING_TOOL::PlaceGraphics( const TOOL_EVENT& aEvent )
     if( !m_frame->GetModel() )
         return 0;
 
-    DIALOG_IMPORT_GFX dlg( m_frame );
+    DIALOG_IMPORT_GFX dlg( m_frame, m_editModules );
     int dlgResult = dlg.ShowModal();
     auto& list = dlg.GetImportedItems();
 
@@ -537,9 +537,11 @@ int DRAWING_TOOL::PlaceGraphics( const TOOL_EVENT& aEvent )
     for( auto it = list.begin(), itEnd = list.end(); it != itEnd; ++it )
     {
         KICAD_T type = (*it)->Type();
-        assert( type == PCB_LINE_T || type == PCB_TEXT_T );
+        wxASSERT( type == PCB_LINE_T || type == PCB_TEXT_T
+                || type == PCB_MODULE_EDGE_T || type == PCB_MODULE_TEXT_T );
 
-        if( type == PCB_LINE_T || type == PCB_TEXT_T )
+        if( type == PCB_LINE_T || type == PCB_TEXT_T
+                || type == PCB_MODULE_EDGE_T || type == PCB_MODULE_TEXT_T )
             preview.Add( it->get() );
     }
 
