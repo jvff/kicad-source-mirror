@@ -88,7 +88,7 @@ inline int Millimeter2iu( double mm )
     return (int) ( mm < 0 ? mm * IU_PER_MM - 0.5 : mm * IU_PER_MM + 0.5);
 }
 
-/// Convert mm to internal units (iu).
+/// Convert internal units (iu) to mm.
 inline double Iu2Millimeter( int iu )
 {
     return iu / IU_PER_MM;
