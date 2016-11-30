@@ -24,6 +24,9 @@
 
 #include "svg_import_plugin.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include <wx/gdicmn.h>
 #include <math/vector2d.h>
 
@@ -31,10 +34,21 @@
 
 #include "graphics_importer.h"
 
+static VECTOR2D calculateBezierBoundingBoxExtremity( const float* aCurvePoints,
+        std::function< const float&( const float&, const float& ) > comparator );
+static float calculateBezierSegmentationThreshold( const float* aCurvePoints );
+static void segmentBezierCurve( const VECTOR2D& aStart, const VECTOR2D& aEnd, float aOffset,
+        float aStep, const float* aCurvePoints, float aSegmentationThreshold,
+        std::vector< VECTOR2D >& aGeneratedPoints );
+static void createNewBezierCurveSegments( const VECTOR2D& aStart, const VECTOR2D& aMiddle,
+        const VECTOR2D& aEnd, float aOffset, float aStep, const float* aCurvePoints,
+        float aSegmentationThreshold, std::vector< VECTOR2D >& aGeneratedPoints );
 static VECTOR2D getBezierPoint( const float* aCurvePoints, float aStep );
 static VECTOR2D getPoint( const float* aPointCoordinates );
 static VECTOR2D getPointInLine( const VECTOR2D& aLineStart, const VECTOR2D& aLineEnd,
         float aDistance );
+static float distanceFromPointToLine( const VECTOR2D& aPoint, const VECTOR2D& aLineStart,
+        const VECTOR2D& aLineEnd );
 
 bool SVG_IMPORT_PLUGIN::Load( const wxString& aFileName )
 {
@@ -102,12 +116,13 @@ void SVG_IMPORT_PLUGIN::DrawCubicBezierPath( const float* aPoints, int aNumPoint
 void SVG_IMPORT_PLUGIN::DrawCubicBezierCurve( const float* aPoints,
         std::vector< VECTOR2D >& aGeneratedPoints )
 {
-    for( float step = 0.f; step < 1.f; step += 0.01f )
-    {
-        auto point = getBezierPoint( aPoints, step );
+    auto start = getBezierPoint( aPoints, 0.f );
+    auto end = getBezierPoint( aPoints, 1.f );
+    auto segmentationThreshold = calculateBezierSegmentationThreshold( aPoints );
 
-        aGeneratedPoints.push_back( point );
-    }
+    aGeneratedPoints.push_back( start );
+    segmentBezierCurve( start, end, 0.f, 0.5f, aPoints, segmentationThreshold, aGeneratedPoints );
+    aGeneratedPoints.push_back( end );
 }
 
 
@@ -172,4 +187,82 @@ static VECTOR2D getPointInLine( const VECTOR2D& aLineStart, const VECTOR2D& aLin
         float aDistance )
 {
     return aLineStart + ( aLineEnd - aLineStart ) * aDistance;
+}
+
+
+static float calculateBezierSegmentationThreshold( const float* aCurvePoints )
+{
+    using comparatorFunction = const float&(*)( const float&, const float& );
+
+    auto minimumComparator = static_cast< comparatorFunction >( &std::min );
+    auto maximumComparator = static_cast< comparatorFunction >( &std::max );
+
+    VECTOR2D minimum = calculateBezierBoundingBoxExtremity( aCurvePoints, minimumComparator );
+    VECTOR2D maximum = calculateBezierBoundingBoxExtremity( aCurvePoints, maximumComparator );
+    VECTOR2D boundingBoxDimensions = maximum - minimum;
+
+    return 0.001 * std::max( boundingBoxDimensions.x, boundingBoxDimensions.y );
+}
+
+
+static VECTOR2D calculateBezierBoundingBoxExtremity( const float* aCurvePoints,
+        std::function< const float&( const float&, const float& ) > comparator )
+{
+    float x, y;
+
+    x = aCurvePoints[0];
+    y = aCurvePoints[1];
+
+    for( int pointIndex = 1; pointIndex < 3; ++pointIndex )
+    {
+        x = comparator( x, aCurvePoints[ 2 * pointIndex ] );
+        y = comparator( y, aCurvePoints[ 2 * pointIndex + 1 ] );
+    }
+
+    return VECTOR2D( x, y );
+}
+
+
+static void segmentBezierCurve( const VECTOR2D& aStart, const VECTOR2D& aEnd, float aOffset,
+        float aStep, const float* aCurvePoints, float aSegmentationThreshold,
+        std::vector< VECTOR2D >& aGeneratedPoints )
+{
+    VECTOR2D middle = getBezierPoint( aCurvePoints, aOffset + aStep );
+    float distanceToPreviousSegment = distanceFromPointToLine( middle, aStart, aEnd );
+
+    if( distanceToPreviousSegment > aSegmentationThreshold )
+    {
+        createNewBezierCurveSegments( aStart, middle, aEnd, aOffset, aStep, aCurvePoints,
+                aSegmentationThreshold, aGeneratedPoints );
+    }
+}
+
+
+static void createNewBezierCurveSegments( const VECTOR2D& aStart, const VECTOR2D& aMiddle,
+        const VECTOR2D& aEnd, float aOffset, float aStep, const float* aCurvePoints,
+        float aSegmentationThreshold, std::vector< VECTOR2D >& aGeneratedPoints )
+{
+    float newStep = aStep / 2.f;
+    float offsetAfterMiddle = aOffset + aStep;
+
+    segmentBezierCurve( aStart, aMiddle, aOffset, newStep, aCurvePoints, aSegmentationThreshold,
+            aGeneratedPoints );
+
+    aGeneratedPoints.push_back( aMiddle );
+
+    segmentBezierCurve( aMiddle, aEnd, offsetAfterMiddle, newStep, aCurvePoints,
+            aSegmentationThreshold, aGeneratedPoints );
+}
+
+
+static float distanceFromPointToLine( const VECTOR2D& aPoint, const VECTOR2D& aLineStart,
+        const VECTOR2D& aLineEnd )
+{
+    auto lineDirection = aLineEnd - aLineStart;
+    auto lineNormal = lineDirection.Perpendicular().Resize( 1.f );
+    auto lineStartToPoint = aPoint - aLineStart;
+
+    auto distance = lineNormal.Dot( lineStartToPoint );
+
+    return fabs( distance );
 }
