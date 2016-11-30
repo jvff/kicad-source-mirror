@@ -67,9 +67,9 @@ public:
     /**
      * @brief Sets the line width for the imported outlines.
      */
-    void SetLineWidth( unsigned int aWidth )
+    void SetLineWidth( double aWidth )
     {
-        m_lineWidth = aWidth;
+        m_lineWidth = (unsigned int)( aWidth * m_scale );
     }
 
     /**
