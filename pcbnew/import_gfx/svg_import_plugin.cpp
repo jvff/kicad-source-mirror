@@ -74,19 +74,10 @@ bool SVG_IMPORT_PLUGIN::Load( const wxString& aFileName )
 
 void SVG_IMPORT_PLUGIN::DrawPath( const float* aPoints, int aNumPoints, bool aClosedPath )
 {
-    const int numBezierPoints = aNumPoints & ~0x3;
-    const int numLinePoints = aNumPoints & 0x3;
-
-    const int numBezierCoordinates = numBezierPoints * 2;
-    const float* linePoints = aPoints + numBezierCoordinates;
-
     std::vector< VECTOR2D > collectedPathPoints;
 
-    if( numBezierPoints > 0 )
-        DrawCubicBezierPath( aPoints, numBezierPoints, collectedPathPoints );
-
-    if( numLinePoints > 0 )
-        DrawLinePath( linePoints, numLinePoints, collectedPathPoints );
+    if( aNumPoints > 0 )
+        DrawCubicBezierPath( aPoints, aNumPoints, collectedPathPoints );
 
     if( aClosedPath )
         DrawPolygon( collectedPathPoints );
@@ -123,22 +114,6 @@ void SVG_IMPORT_PLUGIN::DrawCubicBezierCurve( const float* aPoints,
     aGeneratedPoints.push_back( start );
     segmentBezierCurve( start, end, 0.f, 0.5f, aPoints, segmentationThreshold, aGeneratedPoints );
     aGeneratedPoints.push_back( end );
-}
-
-
-void SVG_IMPORT_PLUGIN::DrawLinePath( const float* aPoints, int aNumPoints,
-        std::vector< VECTOR2D >& aGeneratedPoints )
-{
-    const int coordinatesPerPoint = 2;
-    const float* remainingPoints = aPoints;
-    for( int numPoints = aNumPoints; numPoints > 0; --numPoints )
-    {
-        auto point = getPoint( remainingPoints );
-
-        aGeneratedPoints.push_back( point );
-
-        remainingPoints+= coordinatesPerPoint;
-    }
 }
 
 

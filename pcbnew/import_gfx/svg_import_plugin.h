@@ -48,9 +48,6 @@ public:
 private:
     void DrawPath( const float* aPoints, int aNumPoints, bool aClosedPath );
 
-    void DrawLinePath( const float* aPoints, int aNumPoints,
-            std::vector< VECTOR2D >& aGeneratedPoints );
-
     void DrawCubicBezierPath( const float* aPoints, int aNumPoints,
             std::vector< VECTOR2D >& aGeneratedPoints );
 
