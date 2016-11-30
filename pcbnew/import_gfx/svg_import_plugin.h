@@ -25,6 +25,8 @@
 #ifndef SVG_IMPORT_PLUGIN_H
 #define SVG_IMPORT_PLUGIN_H
 
+#include "nanosvg.h"
+
 #include "graphics_import_plugin.h"
 #include "drw_interface.h"
 #include <math/vector2d.h>
@@ -45,6 +47,29 @@ public:
 
     bool Load( const wxString& aFileName ) override;
 
+    virtual unsigned int GetImageHeight() const override
+    {
+        if( !m_parsedImage )
+        {
+            wxASSERT_MSG(false, "Image must have been loaded before checking height");
+            return false;
+        }
+
+        return Millimeter2iu( m_parsedImage->height );
+    }
+
+    virtual unsigned int GetImageWidth() const override
+    {
+        if( !m_parsedImage )
+        {
+            wxASSERT_MSG(false, "Image must have been loaded before checking width");
+            return false;
+        }
+
+        return Millimeter2iu( m_parsedImage->width );
+    }
+
+
 private:
     void DrawPath( const float* aPoints, int aNumPoints, bool aClosedPath );
 
@@ -56,6 +81,8 @@ private:
 
     void DrawPolygon( const std::vector< VECTOR2D >& aPoints );
     void DrawLineSegments( const std::vector< VECTOR2D >& aPoints );
+
+    struct NSVGimage* m_parsedImage;
 };
 
 #endif /* SVG_IMPORT_PLUGIN_H */

@@ -30,8 +30,7 @@
 #include <wx/gdicmn.h>
 #include <math/vector2d.h>
 
-#include "nanosvg.h"
-
+#include "convert_to_biu.h"
 #include "graphics_importer.h"
 
 static VECTOR2D calculateBezierBoundingBoxExtremity( const float* aCurvePoints,
@@ -54,19 +53,24 @@ bool SVG_IMPORT_PLUGIN::Load( const wxString& aFileName )
 {
     wxCHECK( m_importer, false );
 
-    struct NSVGimage* image = nsvgParseFromFile( aFileName.c_str(), "px", 96 );
+    m_parsedImage = nsvgParseFromFile( aFileName.c_str(), "mm", 96 );
 
-    wxCHECK( image, false );
+    m_originalWidth =
 
-    for( NSVGshape* shape = image->shapes; shape != NULL; shape = shape->next )
+    wxCHECK( m_parsedImage, false );
+
+    return true;
+}
+
+bool SVG_IMPORT_PLUGIN::Import(float aXScale, float aYScale)
+{
+    for( NSVGshape* shape = m_parsedImage->shapes; shape != NULL; shape = shape->next )
     {
         m_importer->SetLineWidth( shape->strokeWidth );
-
+        //@todo: scale differently for each direction.
         for( NSVGpath* path = shape->paths; path != NULL; path = path->next )
             DrawPath( path->pts, path->npts, path->closed );
     }
-
-    nsvgDelete( image );
 
     return true;
 }

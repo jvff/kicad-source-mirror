@@ -58,11 +58,32 @@ public:
     }
 
     /**
-     * @brief Imports shapes stored in a file.
+     * @brief Imports shapes from loaded file.
      *
-     * It is important to set the plugin type before importing shapes from a file.
+     * It is important to have the file loaded before importing.
      */
-    bool Import( const wxString& aFileName );
+    bool Import( float aXScale, float aYScale);
+
+    /**
+     * @brief Get original image Wigth.
+     *
+     * @return Width of the loaded image in internal units.
+     */
+    unsigned int GetImageWidth() const
+    {
+        return m_originalWidth;
+    }
+
+    /**
+     * @brief Get original image Height
+     *
+     * @return Height of the loaded image in internal units.
+     */
+    unsigned int GetImageHeight() const
+    {
+        return m_originalHeight;
+    }
+
 
     /**
      * @brief Sets the line width for the imported outlines.
@@ -80,12 +101,22 @@ public:
         return m_lineWidth;
     }
 
+
     /**
-     * @brief Sets scale affecting the imported shapes.
+     * @brief Sets scale affecting the imported shapes, for the X direction.
      */
-    void SetScale( double aScale )
+    void SetXScale( double aScale )
     {
-        m_scale = aScale;
+        m_xScale = aScale;
+    }
+
+
+    /**
+     * @brief Sets scale affecting the imported shapes, for the Y direction.
+     */
+    void SetYScale( double aScale )
+    {
+        m_yScale = aScale;
     }
 
     /**
@@ -163,6 +194,12 @@ private:
 
     ///> Plugin used to load a file
     std::unique_ptr<GRAPHICS_IMPORT_PLUGIN> m_plugin;
+
+    ///> Total image width
+    unsigned int m_originalWidth;
+
+    ///> Total image Height;
+    unsigned int m_originalHeight;
 
     ///> Default line thickness for the imported graphics
     unsigned int m_lineWidth;

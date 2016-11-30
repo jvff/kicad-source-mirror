@@ -82,16 +82,39 @@ public:
     }
 
     /**
-     * @brief Loads shapes from a file.
+     * @brief Loads file for import.
      *
      * It is necessary to have the GRAPHICS_IMPORTER object set before.
      */
     virtual bool Load( const wxString& aFileName ) = 0;
 
+    /**
+     * @brief Return image height from original imported file.
+     *
+     * @return Original Image height in internal units.
+     */
+    virtual unsigned int GetImageHeight() const = 0;
+
+    /**
+     * @brief Return image width from original imported file.
+     *
+     * @return Original Image width in internal units.
+     */
+    virtual unsigned int GetImageWidth() const = 0;
+
+    /**
+     * @brief Actually imports the file.
+     *
+     * It is necessary to have loaded the file beforehand.
+     */
+    virtual bool Import( float aXScale, float aYScale ) = 0;
+
+
 protected:
     ///> Importer used to create objects representing the imported shapes.
     GRAPHICS_IMPORTER* m_importer;
 };
+
 
 #endif /* GRAPHICS_IMPORT_PLUGIN_H */
 

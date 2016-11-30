@@ -31,7 +31,7 @@ GRAPHICS_IMPORTER::GRAPHICS_IMPORTER() :
 }
 
 
-bool GRAPHICS_IMPORTER::Import( const wxString& aFileName )
+bool GRAPHICS_IMPORTER::Load( const wxString &aFileName )
 {
     m_items.clear();
 
@@ -42,5 +42,11 @@ bool GRAPHICS_IMPORTER::Import( const wxString& aFileName )
     }
 
     m_plugin->SetImporter( this );
-    return m_plugin->Load( aFileName );
+
+    wxCheck(m_plugin->Load( aFileName ));
+}
+
+bool GRAPHICS_IMPORTER::Import( float aXScale, float aYScale)
+{
+    return m_plugin->Import();
 }
