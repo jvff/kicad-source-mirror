@@ -84,13 +84,17 @@ void SVG_IMPORT_PLUGIN::DrawPath( const float* aPoints, int aNumPoints, bool aCl
 void SVG_IMPORT_PLUGIN::DrawCubicBezierPath( const float* aPoints, int aNumPoints,
         std::vector< VECTOR2D >& aGeneratedPoints )
 {
-    const int numberOfCoordinatesPerSegment = 2 * 4;
+    const int pointsPerSegment = 4;
+    const int curveSpecificPointsPerSegment = 3;
+    const int curveSpecificCoordinatesPerSegment = 2 * curveSpecificPointsPerSegment;
     const float* currentPoints = aPoints;
+    int remainingPoints = aNumPoints;
 
-    for( int numPoints = aNumPoints; numPoints > 0; numPoints -= 4 )
+    while( remainingPoints >= pointsPerSegment )
     {
         DrawCubicBezierCurve( currentPoints, aGeneratedPoints );
-        currentPoints += numberOfCoordinatesPerSegment;
+        currentPoints += curveSpecificCoordinatesPerSegment;
+        remainingPoints -= curveSpecificPointsPerSegment;
     }
 }
 
