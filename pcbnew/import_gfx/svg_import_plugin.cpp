@@ -55,8 +55,6 @@ bool SVG_IMPORT_PLUGIN::Load( const wxString& aFileName )
 
     m_parsedImage = nsvgParseFromFile( aFileName.c_str(), "mm", 96 );
 
-    m_originalWidth =
-
     wxCHECK( m_parsedImage, false );
 
     return true;
@@ -67,7 +65,7 @@ bool SVG_IMPORT_PLUGIN::Import(float aXScale, float aYScale)
     for( NSVGshape* shape = m_parsedImage->shapes; shape != NULL; shape = shape->next )
     {
         m_importer->SetLineWidth( shape->strokeWidth );
-        //@todo: scale differently for each direction.
+
         for( NSVGpath* path = shape->paths; path != NULL; path = path->next )
             DrawPath( path->pts, path->npts, path->closed );
     }
