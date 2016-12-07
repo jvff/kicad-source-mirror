@@ -50,6 +50,8 @@ private:
     int                  m_gridUnits;
     double               m_gridOffsetX;
     double               m_gridOffsetY;
+    double               m_newHeight;
+    double               m_newWidth;
 
     static wxString      m_filename;
     static int           m_offsetSelection;
@@ -60,6 +62,7 @@ private:
     void OnOKClick( wxCommandEvent& event ) override;
     void OnBrowseFiles( wxCommandEvent& event ) override;
     void OriginOptionOnUpdateUI( wxUpdateUIEvent& event ) override;
+    void onChangeHeight( wxUpdateUIEvent& event ) override;
     int  GetPCBGridUnits( void );
     void GetPCBGridOffsets( double &aXOffset, double &aYOffset );
 };

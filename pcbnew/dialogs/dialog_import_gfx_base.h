@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct 17 2016)
+// C++ code generated with wxFormBuilder (version Nov 15 2016)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -24,9 +24,10 @@ class PCB_LAYER_BOX_SELECTOR;
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
+#include <wx/choice.h>
 #include <wx/radiobox.h>
 #include <wx/valtext.h>
-#include <wx/choice.h>
+#include <wx/checkbox.h>
 #include <wx/bmpcbox.h>
 #include <wx/statline.h>
 #include <wx/dialog.h>
@@ -46,13 +47,18 @@ class DIALOG_IMPORT_GFX_BASE : public DIALOG_SHIM
 		wxStaticText* m_staticText37;
 		wxTextCtrl* m_textCtrlFileName;
 		wxButton* m_buttonBrowse;
+		wxStaticText* m_staticText3;
+		wxChoice* m_PCBGridUnits;
 		wxRadioBox* m_rbOffsetOption;
 		wxStaticText* m_staticText4;
 		wxTextCtrl* m_PCBXCoord;
 		wxStaticText* m_staticText5;
 		wxTextCtrl* m_PCBYCoord;
-		wxStaticText* m_staticText3;
-		wxChoice* m_PCBGridUnits;
+		wxStaticText* m_staticText6;
+		wxTextCtrl* m_tcHeight;
+		wxStaticText* m_staticText7;
+		wxTextCtrl* m_tcWidth;
+		wxCheckBox* m_cbKeepAspectRatio;
 		wxStaticText* m_staticTextBrdlayer;
 		PCB_LAYER_BOX_SELECTOR* m_SelLayerBox;
 		wxStaticLine* m_staticline8;
@@ -63,6 +69,8 @@ class DIALOG_IMPORT_GFX_BASE : public DIALOG_SHIM
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnBrowseFiles( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OriginOptionOnUpdateUI( wxUpdateUIEvent& event ) { event.Skip(); }
+		virtual void onChangeHeight( wxUpdateUIEvent& event ) { event.Skip(); }
+		virtual void onKeepAspectRatioUpdate( wxUpdateUIEvent& event ) { event.Skip(); }
 		virtual void OnCancelClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnOKClick( wxCommandEvent& event ) { event.Skip(); }
 		

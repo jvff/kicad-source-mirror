@@ -238,6 +238,18 @@ void DIALOG_IMPORT_GFX::OnOKClick( wxCommandEvent& event )
     }
 }
 
+void DIALOG_IMPORT_GFX::onChangeHeight( wxUpdateUIEvent &event)
+{
+    double heightInput;
+
+    heightInput = DoubleValueFromString(UNSCALED_UNITS,m_tcHeight->GetValue());
+
+    if(m_cbKeepAspectRatio->GetValue())
+    {
+        // @todo: implement scaling of Y
+    }
+}
+
 
 bool InvokeDialogImportGfxBoard( PCB_BASE_FRAME* aCaller )
 {

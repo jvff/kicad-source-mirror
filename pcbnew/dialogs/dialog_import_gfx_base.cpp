@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct 17 2016)
+// C++ code generated with wxFormBuilder (version Nov 15 2016)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -35,6 +35,27 @@ DIALOG_IMPORT_GFX_BASE::DIALOG_IMPORT_GFX_BASE( wxWindow* parent, wxWindowID id,
 	
 	
 	bSizerMain->Add( bSizerFile, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer10;
+	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText3 = new wxStaticText( this, wxID_ANY, _("Units:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText3->Wrap( -1 );
+	bSizer5->Add( m_staticText3, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	wxString m_PCBGridUnitsChoices[] = { _("mm"), _("inch") };
+	int m_PCBGridUnitsNChoices = sizeof( m_PCBGridUnitsChoices ) / sizeof( wxString );
+	m_PCBGridUnits = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_PCBGridUnitsNChoices, m_PCBGridUnitsChoices, 0 );
+	m_PCBGridUnits->SetSelection( 0 );
+	m_PCBGridUnits->SetToolTip( _("Select PCB grid units") );
+	
+	bSizer5->Add( m_PCBGridUnits, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	
+	bSizer10->Add( bSizer5, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
@@ -94,29 +115,52 @@ DIALOG_IMPORT_GFX_BASE::DIALOG_IMPORT_GFX_BASE( wxWindow* parent, wxWindowID id,
 	
 	bSizer4->Add( bSizer7, 1, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText3 = new wxStaticText( this, wxID_ANY, _("Units:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText3->Wrap( -1 );
-	bSizer5->Add( m_staticText3, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	
-	wxString m_PCBGridUnitsChoices[] = { _("mm"), _("inch") };
-	int m_PCBGridUnitsNChoices = sizeof( m_PCBGridUnitsChoices ) / sizeof( wxString );
-	m_PCBGridUnits = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_PCBGridUnitsNChoices, m_PCBGridUnitsChoices, 0 );
-	m_PCBGridUnits->SetSelection( 0 );
-	m_PCBGridUnits->SetToolTip( _("Select PCB grid units") );
-	
-	bSizer5->Add( m_PCBGridUnits, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	bSizer3->Add( bSizer4, 1, wxALIGN_CENTER_VERTICAL, 5 );
 	
 	
-	bSizer4->Add( bSizer5, 1, wxEXPAND, 5 );
+	bSizer10->Add( bSizer3, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer101;
+	bSizer101 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer11;
+	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticText6 = new wxStaticText( this, wxID_ANY, _("Height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText6->Wrap( -1 );
+	bSizer11->Add( m_staticText6, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_tcHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer11->Add( m_tcHeight, 0, wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticText7 = new wxStaticText( this, wxID_ANY, _("Width:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText7->Wrap( -1 );
+	bSizer11->Add( m_staticText7, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	m_tcWidth = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_tcWidth->Enable( false );
+	
+	bSizer11->Add( m_tcWidth, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	
-	bSizer3->Add( bSizer4, 1, 0, 5 );
+	bSizer101->Add( bSizer11, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer( wxVERTICAL );
+	
+	m_cbKeepAspectRatio = new wxCheckBox( this, wxID_ANY, _("Keep aspect ratio"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_cbKeepAspectRatio->SetValue(true); 
+	bSizer15->Add( m_cbKeepAspectRatio, 0, wxALL, 5 );
 	
 	
-	bSizerMain->Add( bSizer3, 1, wxALL|wxEXPAND, 5 );
+	bSizer101->Add( bSizer15, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizer10->Add( bSizer101, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	bSizerMain->Add( bSizer10, 1, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer8;
 	bSizer8 = new wxBoxSizer( wxHORIZONTAL );
@@ -153,6 +197,8 @@ DIALOG_IMPORT_GFX_BASE::DIALOG_IMPORT_GFX_BASE( wxWindow* parent, wxWindowID id,
 	// Connect Events
 	m_buttonBrowse->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnBrowseFiles ), NULL, this );
 	m_rbOffsetOption->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::OriginOptionOnUpdateUI ), NULL, this );
+	m_tcHeight->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::onChangeHeight ), NULL, this );
+	m_cbKeepAspectRatio->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::onKeepAspectRatioUpdate ), NULL, this );
 	m_sdbSizer1Cancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnCancelClick ), NULL, this );
 	m_sdbSizer1OK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnOKClick ), NULL, this );
 }
@@ -162,6 +208,8 @@ DIALOG_IMPORT_GFX_BASE::~DIALOG_IMPORT_GFX_BASE()
 	// Disconnect Events
 	m_buttonBrowse->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnBrowseFiles ), NULL, this );
 	m_rbOffsetOption->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::OriginOptionOnUpdateUI ), NULL, this );
+	m_tcHeight->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::onChangeHeight ), NULL, this );
+	m_cbKeepAspectRatio->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( DIALOG_IMPORT_GFX_BASE::onKeepAspectRatioUpdate ), NULL, this );
 	m_sdbSizer1Cancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnCancelClick ), NULL, this );
 	m_sdbSizer1OK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_IMPORT_GFX_BASE::OnOKClick ), NULL, this );
 	
