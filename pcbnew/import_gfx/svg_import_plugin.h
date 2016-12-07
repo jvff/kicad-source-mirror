@@ -29,6 +29,7 @@
 
 #include "graphics_import_plugin.h"
 #include "drw_interface.h"
+#include "convert_to_biu.h"
 #include <math/vector2d.h>
 
 
@@ -45,6 +46,7 @@ public:
         return wxArrayString( 1, { "svg" } );
     }
 
+    bool Import(float aXScale, float aYScale) override;
     bool Load( const wxString& aFileName ) override;
 
     virtual unsigned int GetImageHeight() const override

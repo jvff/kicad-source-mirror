@@ -58,11 +58,19 @@ public:
     }
 
     /**
+     * @brief Load file and get its basic data
+     *
+     */
+    bool  Load( const wxString &aFileName );
+
+
+    /**
      * @brief Imports shapes from loaded file.
      *
      * It is important to have the file loaded before importing.
      */
     bool Import( float aXScale, float aYScale);
+
 
     /**
      * @brief Get original image Wigth.
@@ -204,8 +212,15 @@ private:
     ///> Default line thickness for the imported graphics
     unsigned int m_lineWidth;
 
+    ///> Scale factor applied to the imported graphics, X direction
+    double m_xScale;
+
+    ///> Scale factor applied to the imported graphics, Y direction
+    double m_yScale;
+
     ///> Scale factor applied to the imported graphics
     double m_scale;
+
 };
 
 #endif /* GRAPHICS_IMPORTER_H */
