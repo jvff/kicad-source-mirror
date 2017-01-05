@@ -33,6 +33,7 @@
 #include "graphics_import_plugin.h"
 #include "drw_interface.h"
 
+class wxPoint;
 class wxRealPoint;
 
 class DXF_IMPORT_PLUGIN : public GRAPHICS_IMPORT_PLUGIN, public DRW_Interface
@@ -51,6 +52,10 @@ public:
     }
 
     bool Load( const wxString& aFileName ) override;
+    bool Import( float aXScale, float aYScale ) override;
+
+    unsigned int GetImageWidth() const override;
+    unsigned int GetImageHeight() const override;
 
 private:
     // coordinate conversions from dxf to internal units
@@ -92,7 +97,12 @@ private:
     void writeLine();
     void writeMtext();
 
+    void updateImageLimits( const wxPoint& aPoint );
+
     double m_DXF2mm;        // The scale factor to convert DXF units to mm
+
+    int m_minX, m_maxX;
+    int m_minY, m_maxY;
 
     // These functions are not used in Kicad.
     // But because they are virtual pure in DRW_Interface, they should be defined

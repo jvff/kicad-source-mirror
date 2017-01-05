@@ -25,6 +25,8 @@
 #include "dxf_import_plugin.h"
 #include "graphics_importer.h"
 
+#include <limits>
+
 #include <libdxfrw.h>
 #include <convert_to_biu.h>
 
@@ -37,7 +39,11 @@
 static const double MIN_BULGE = 0.0218;
 
 DXF_IMPORT_PLUGIN::DXF_IMPORT_PLUGIN()
-    : m_DXF2mm( 1.0 )
+    : m_DXF2mm( 1.0 ),
+    m_minX(std::numeric_limits<int>::max()),
+    m_maxX(std::numeric_limits<int>::min()),
+    m_minY(std::numeric_limits<int>::max()),
+    m_maxY(std::numeric_limits<int>::min())
 {
 }
 
@@ -48,6 +54,22 @@ bool DXF_IMPORT_PLUGIN::Load( const wxString& aFileName )
 
     dxfRW dxf( aFileName.ToUTF8() );
     return dxf.read( this, true );
+}
+
+
+bool DXF_IMPORT_PLUGIN::Import( float aXScale, float aYScale )
+{
+    return true;
+}
+
+
+unsigned int DXF_IMPORT_PLUGIN::GetImageWidth() const {
+    return m_maxX - m_minX;
+}
+
+
+unsigned int DXF_IMPORT_PLUGIN::GetImageHeight() const {
+    return m_maxY - m_minY;
 }
 
 
@@ -78,6 +100,9 @@ void DXF_IMPORT_PLUGIN::insertLine( const wxRealPoint& aSegStart, const wxRealPo
     wxPoint origin( Millimeter2iu( aSegStart.x ), Millimeter2iu( aSegStart.y ) );
     wxPoint end( Millimeter2iu( aSegEnd.x ), Millimeter2iu( aSegEnd.y ) );
     m_importer->AddLine( origin, end );
+
+    updateImageLimits( origin );
+    updateImageLimits( end );
 }
 
 
@@ -149,6 +174,11 @@ void DXF_IMPORT_PLUGIN::insertArc( const wxRealPoint& aSegStart, const wxRealPoi
     }
 
     m_importer->AddArc( center, start, angle );
+
+    wxPoint radiusDelta( Millimeter2iu( radius ), Millimeter2iu( radius ) );
+
+    updateImageLimits( center + radiusDelta );
+    updateImageLimits( center - radiusDelta );
 }
 
 
@@ -240,6 +270,9 @@ void DXF_IMPORT_PLUGIN::addLine( const DRW_Line& aData )
     wxPoint start( mapX( aData.basePoint.x ), mapY( aData.basePoint.y ) );
     wxPoint end( mapX( aData.secPoint.x ), mapY( aData.secPoint.y ) );
     m_importer->AddLine( start, end );
+
+    updateImageLimits( start );
+    updateImageLimits( end );
 }
 
 
@@ -247,6 +280,11 @@ void DXF_IMPORT_PLUGIN::addCircle( const DRW_Circle& aData )
 {
     wxPoint center( mapX( aData.basePoint.x ), mapY( aData.basePoint.y ) );
     m_importer->AddCircle( center, mapDim( aData.radious ) );
+
+    wxPoint radiusDelta( mapDim( aData.radious ), mapDim( aData.radious ) );
+
+    updateImageLimits( center + radiusDelta );
+    updateImageLimits( center - radiusDelta );
 }
 
 
@@ -271,6 +309,11 @@ void DXF_IMPORT_PLUGIN::addArc( const DRW_Arc& data )
         angle -= 3600.0;
 
     m_importer->AddArc( center, arcStart, angle );
+
+    wxPoint radiusDelta( mapDim( data.radious ), mapDim( data.radious ) );
+
+    updateImageLimits( center + radiusDelta );
+    updateImageLimits( center - radiusDelta );
 }
 
 
@@ -340,18 +383,25 @@ void DXF_IMPORT_PLUGIN::addPolyline(const DRW_Polyline& aData )
             segment_startpoint.x = mapX( vertex->basePoint.x );
             segment_startpoint.y = mapY( vertex->basePoint.y );
             polyline_startpoint  = segment_startpoint;
+
+            updateImageLimits( segment_startpoint );
+
             continue;
         }
 
         wxPoint segment_endpoint( mapX( vertex->basePoint.x ), mapY( vertex->basePoint.y ) );
         m_importer->AddLine( segment_startpoint, segment_endpoint );
         segment_startpoint = segment_endpoint;
+
+        updateImageLimits( segment_endpoint );
     }
 
     // Polyline flags bit 0 indicates closed (1) or open (0) polyline
     if( aData.flags & 1 )
     {
         m_importer->AddLine( segment_startpoint, polyline_startpoint );
+
+        updateImageLimits( segment_startpoint );
     }
 }
 
@@ -428,6 +478,8 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
 
     m_importer->AddText( refPoint, text, mapDim( aData.height ), mapDim( aData.height * 0.8 ),
             aData.angle * 10, hJustify, vJustify );
+
+    // @todo updateImageLimits( ? );
 }
 
 
@@ -520,6 +572,8 @@ void DXF_IMPORT_PLUGIN::addMText( const DRW_MText& aData )
     m_importer->AddText( textpos, text,
             mapDim( aData.height ), mapDim( aData.height * 0.8 ), aData.angle * 10,
             hJustify, vJustify );
+
+    // @todo updateImageLimits( ? );
 }
 
 
@@ -648,4 +702,14 @@ wxString DXF_IMPORT_PLUGIN::toNativeString( const wxString& aData )
 #endif
 
     return res;
+}
+
+
+void DXF_IMPORT_PLUGIN::updateImageLimits( const wxPoint& aPoint )
+{
+    m_minX = std::min( aPoint.x, m_minX );
+    m_maxX = std::max( aPoint.x, m_maxX );
+
+    m_minY = std::min( aPoint.y, m_minY );
+    m_maxY = std::max( aPoint.y, m_maxY );
 }
