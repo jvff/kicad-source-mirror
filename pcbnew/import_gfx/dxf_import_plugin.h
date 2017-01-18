@@ -98,6 +98,7 @@ private:
     void writeMtext();
 
     void updateImageLimits( const wxPoint& aPoint );
+    void updateImageLimits( const wxRealPoint& aPoint );
 
     double m_DXF2mm;        // The scale factor to convert DXF units to mm
 

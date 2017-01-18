@@ -422,6 +422,17 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
         }
     }
 
+    wxString text = toNativeString( wxString::FromUTF8( aData.text.c_str() ) );
+
+    int textHeight = mapDim( aData.height );
+    int charWidth = mapDim( textHeight * 0.8 );
+    int textWidth = charWidth * text.length();          // Rough approximation
+
+    wxRealPoint bottomLeft(0.0, 0.0);
+    wxRealPoint bottomRight(0.0, 0.0);
+    wxRealPoint topLeft(0.0, 0.0);
+    wxRealPoint topRight(0.0, 0.0);
+
     EDA_TEXT_HJUSTIFY_T hJustify = GR_TEXT_HJUSTIFY_LEFT;
     EDA_TEXT_VJUSTIFY_T vJustify = GR_TEXT_VJUSTIFY_BOTTOM;
 
@@ -430,14 +441,25 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
     case DRW_Text::VBaseLine:
     case DRW_Text::VBottom:
         vJustify = GR_TEXT_VJUSTIFY_BOTTOM;
+
+        topLeft.y = textHeight;
+        topRight.y = textHeight;
         break;
 
     case DRW_Text::VMiddle:
         vJustify = GR_TEXT_VJUSTIFY_CENTER;
+
+        bottomRight.y = -textHeight / 2.0;
+        bottomLeft.y = -textHeight / 2.0;
+        topLeft.y = textHeight / 2.0;
+        topRight.y = textHeight / 2.0;
         break;
 
     case DRW_Text::VTop:
         vJustify = GR_TEXT_VJUSTIFY_TOP;
+
+        bottomLeft.y = -textHeight;
+        bottomRight.y = -textHeight;
         break;
     }
 
@@ -447,15 +469,26 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
     case DRW_Text::HAligned:    // no equivalent options in text pcb.
     case DRW_Text::HFit:        // no equivalent options in text pcb.
         hJustify = GR_TEXT_HJUSTIFY_LEFT;
+
+        bottomRight.x = textWidth;
+        topRight.x = textWidth;
         break;
 
     case DRW_Text::HCenter:
     case DRW_Text::HMiddle:     // no equivalent options in text pcb.
         hJustify = GR_TEXT_HJUSTIFY_CENTER;
+
+        bottomLeft.x = -textWidth / 2.0;
+        topLeft.x = -textWidth / 2.0;
+        bottomRight.x = textWidth / 2.0;
+        topRight.x = textWidth / 2.0;
         break;
 
     case DRW_Text::HRight:
         hJustify = GR_TEXT_HJUSTIFY_RIGHT;
+
+        bottomLeft.x = -textWidth;
+        topLeft.x = -textWidth;
         break;
     }
 
@@ -474,12 +507,34 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
     }
 #endif
 
-    wxString text = toNativeString( wxString::FromUTF8( aData.text.c_str() ) );
+    double angle = aData.angle * 10;
+    double angleInRads = angle / 10.0 * M_PI / 180.0;
+    double cosine = cos(angleInRads);
+    double sine = sin(angleInRads);
 
-    m_importer->AddText( refPoint, text, mapDim( aData.height ), mapDim( aData.height * 0.8 ),
-            aData.angle * 10, hJustify, vJustify );
+    m_importer->AddText( refPoint, text, textHeight, charWidth, angle, hJustify, vJustify );
 
-    // @todo updateImageLimits( ? );
+    bottomLeft.x = bottomLeft.x * cosine - bottomLeft.y * sine;
+    bottomLeft.y = bottomLeft.x * sine + bottomLeft.y * cosine;
+
+    bottomRight.x = bottomRight.x * cosine - bottomRight.y * sine;
+    bottomRight.y = bottomRight.x * sine + bottomRight.y * cosine;
+
+    topLeft.x = topLeft.x * cosine - topLeft.y * sine;
+    topLeft.y = topLeft.x * sine + topLeft.y * cosine;
+
+    topRight.x = topRight.x * cosine - topRight.y * sine;
+    topRight.y = topRight.x * sine + topRight.y * cosine;
+
+    bottomLeft += refPoint;
+    bottomRight += refPoint;
+    topLeft += refPoint;
+    topRight += refPoint;
+
+    updateImageLimits( bottomLeft );
+    updateImageLimits( bottomRight );
+    updateImageLimits( topLeft );
+    updateImageLimits( topRight );
 }
 
 
@@ -487,6 +542,15 @@ void DXF_IMPORT_PLUGIN::addMText( const DRW_MText& aData )
 {
     wxString    text = toNativeString( wxString::FromUTF8( aData.text.c_str() ) );
     wxString    attrib, tmp;
+
+    int textHeight = mapDim( aData.height );
+    int charWidth = mapDim( textHeight * 0.8 );
+    int textWidth = charWidth * text.length();          // Rough approximation
+
+    wxRealPoint bottomLeft(0.0, 0.0);
+    wxRealPoint bottomRight(0.0, 0.0);
+    wxRealPoint topLeft(0.0, 0.0);
+    wxRealPoint topRight(0.0, 0.0);
 
     /* Some texts start by '\' and have formating chars (font name, font option...)
      *  ending with ';'
@@ -522,27 +586,49 @@ void DXF_IMPORT_PLUGIN::addMText( const DRW_MText& aData )
     if( aData.textgen <= 3 )
     {
         vJustify = GR_TEXT_VJUSTIFY_TOP;
+
+        bottomLeft.y = -textHeight;
+        bottomRight.y = -textHeight;
     }
     else if( aData.textgen <= 6 )
     {
         vJustify = GR_TEXT_VJUSTIFY_CENTER;
+
+        bottomRight.y = -textHeight / 2.0;
+        bottomLeft.y = -textHeight / 2.0;
+        topLeft.y = textHeight / 2.0;
+        topRight.y = textHeight / 2.0;
     }
     else
     {
         vJustify = GR_TEXT_VJUSTIFY_BOTTOM;
+
+        topLeft.y = textHeight;
+        topRight.y = textHeight;
     }
 
     if( aData.textgen % 3 == 1 )
     {
         hJustify = GR_TEXT_HJUSTIFY_LEFT;
+
+        bottomRight.x = textWidth;
+        topRight.x = textWidth;
     }
     else if( aData.textgen % 3 == 2 )
     {
         hJustify = GR_TEXT_HJUSTIFY_CENTER;
+
+        bottomLeft.x = -textWidth / 2.0;
+        topLeft.x = -textWidth / 2.0;
+        bottomRight.x = textWidth / 2.0;
+        topRight.x = textWidth / 2.0;
     }
     else
     {
         hJustify = GR_TEXT_HJUSTIFY_RIGHT;
+
+        bottomLeft.x = -textWidth;
+        topLeft.x = -textWidth;
     }
 
 #if 0   // These setting have no mening in Pcbnew
@@ -569,11 +655,34 @@ void DXF_IMPORT_PLUGIN::addMText( const DRW_MText& aData )
     }
 #endif
 
-    m_importer->AddText( textpos, text,
-            mapDim( aData.height ), mapDim( aData.height * 0.8 ), aData.angle * 10,
-            hJustify, vJustify );
+    double angle = aData.angle * 10;
+    double angleInRads = angle / 10.0 * M_PI / 180.0;
+    double cosine = cos(angleInRads);
+    double sine = sin(angleInRads);
 
-    // @todo updateImageLimits( ? );
+    m_importer->AddText( textpos, text, textHeight, charWidth, angle, hJustify, vJustify );
+
+    bottomLeft.x = bottomLeft.x * cosine - bottomLeft.y * sine;
+    bottomLeft.y = bottomLeft.x * sine + bottomLeft.y * cosine;
+
+    bottomRight.x = bottomRight.x * cosine - bottomRight.y * sine;
+    bottomRight.y = bottomRight.x * sine + bottomRight.y * cosine;
+
+    topLeft.x = topLeft.x * cosine - topLeft.y * sine;
+    topLeft.y = topLeft.x * sine + topLeft.y * cosine;
+
+    topRight.x = topRight.x * cosine - topRight.y * sine;
+    topRight.y = topRight.x * sine + topRight.y * cosine;
+
+    bottomLeft += textpos;
+    bottomRight += textpos;
+    topLeft += textpos;
+    topRight += textpos;
+
+    updateImageLimits( bottomLeft );
+    updateImageLimits( bottomRight );
+    updateImageLimits( topLeft );
+    updateImageLimits( topRight );
 }
 
 
@@ -702,6 +811,14 @@ wxString DXF_IMPORT_PLUGIN::toNativeString( const wxString& aData )
 #endif
 
     return res;
+}
+
+
+void DXF_IMPORT_PLUGIN::updateImageLimits( const wxRealPoint& aPoint )
+{
+    wxPoint truncatedPoint( (int)aPoint.x, (int)aPoint.y );
+
+    updateImageLimits( truncatedPoint );
 }
 
 
