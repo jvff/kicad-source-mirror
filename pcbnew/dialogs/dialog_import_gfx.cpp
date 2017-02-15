@@ -229,7 +229,7 @@ void DIALOG_IMPORT_GFX::OnOKClick( wxCommandEvent& event )
         //m_importer->SetScale();       // @todo
 
         m_importer->Load( m_filename );
-        //m_importer->Import( 1.f, 1.f );  // @todo
+        m_importer->Import( 1.f, 1.f );  // @todo
         EndModal( wxID_OK );
     }
     else
