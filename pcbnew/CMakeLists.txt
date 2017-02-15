@@ -155,6 +155,7 @@ set( PCBNEW_IMPORT_GFX
 
     import_gfx/graphics_importer.cpp
     import_gfx/graphics_importer_pcbnew.cpp
+    import_gfx/graphics_importer_buffer.cpp
 
     import_gfx/dxf_import_plugin.cpp
     import_gfx/svg_import_plugin.cpp

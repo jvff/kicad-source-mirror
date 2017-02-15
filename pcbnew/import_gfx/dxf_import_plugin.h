@@ -31,6 +31,7 @@
 #define DXF_IMPORT_PLUGIN_H
 
 #include "graphics_import_plugin.h"
+#include "graphics_importer_buffer.h"
 #include "drw_interface.h"
 
 class wxPoint;
@@ -104,6 +105,8 @@ private:
 
     int m_minX, m_maxX;
     int m_minY, m_maxY;
+
+    GRAPHICS_IMPORTER_BUFFER m_internalImporter;
 
     // These functions are not used in Kicad.
     // But because they are virtual pure in DRW_Interface, they should be defined

@@ -50,8 +50,6 @@ DXF_IMPORT_PLUGIN::DXF_IMPORT_PLUGIN()
 
 bool DXF_IMPORT_PLUGIN::Load( const wxString& aFileName )
 {
-    wxCHECK( m_importer, false );
-
     dxfRW dxf( aFileName.ToUTF8() );
     return dxf.read( this, true );
 }
@@ -59,6 +57,10 @@ bool DXF_IMPORT_PLUGIN::Load( const wxString& aFileName )
 
 bool DXF_IMPORT_PLUGIN::Import( float aXScale, float aYScale )
 {
+    wxCHECK( m_importer, false );
+
+    m_internalImporter.ImportTo( *m_importer );
+
     return true;
 }
 
@@ -99,7 +101,7 @@ void DXF_IMPORT_PLUGIN::insertLine( const wxRealPoint& aSegStart, const wxRealPo
 {
     wxPoint origin( Millimeter2iu( aSegStart.x ), Millimeter2iu( aSegStart.y ) );
     wxPoint end( Millimeter2iu( aSegEnd.x ), Millimeter2iu( aSegEnd.y ) );
-    m_importer->AddLine( origin, end );
+    m_internalImporter.AddLine( origin, end );
 
     updateImageLimits( origin );
     updateImageLimits( end );
@@ -173,7 +175,7 @@ void DXF_IMPORT_PLUGIN::insertArc( const wxRealPoint& aSegStart, const wxRealPoi
         angle = RAD2DECIDEG( -ang );
     }
 
-    m_importer->AddArc( center, start, angle );
+    m_internalImporter.AddArc( center, start, angle );
 
     wxPoint radiusDelta( Millimeter2iu( radius ), Millimeter2iu( radius ) );
 
@@ -269,7 +271,7 @@ void DXF_IMPORT_PLUGIN::addLine( const DRW_Line& aData )
 {
     wxPoint start( mapX( aData.basePoint.x ), mapY( aData.basePoint.y ) );
     wxPoint end( mapX( aData.secPoint.x ), mapY( aData.secPoint.y ) );
-    m_importer->AddLine( start, end );
+    m_internalImporter.AddLine( start, end );
 
     updateImageLimits( start );
     updateImageLimits( end );
@@ -279,7 +281,7 @@ void DXF_IMPORT_PLUGIN::addLine( const DRW_Line& aData )
 void DXF_IMPORT_PLUGIN::addCircle( const DRW_Circle& aData )
 {
     wxPoint center( mapX( aData.basePoint.x ), mapY( aData.basePoint.y ) );
-    m_importer->AddCircle( center, mapDim( aData.radious ) );
+    m_internalImporter.AddCircle( center, mapDim( aData.radious ) );
 
     wxPoint radiusDelta( mapDim( aData.radious ), mapDim( aData.radious ) );
 
@@ -308,7 +310,7 @@ void DXF_IMPORT_PLUGIN::addArc( const DRW_Arc& data )
     if( angle > 0.0 )
         angle -= 3600.0;
 
-    m_importer->AddArc( center, arcStart, angle );
+    m_internalImporter.AddArc( center, arcStart, angle );
 
     wxPoint radiusDelta( mapDim( data.radious ), mapDim( data.radious ) );
 
@@ -390,7 +392,7 @@ void DXF_IMPORT_PLUGIN::addPolyline(const DRW_Polyline& aData )
         }
 
         wxPoint segment_endpoint( mapX( vertex->basePoint.x ), mapY( vertex->basePoint.y ) );
-        m_importer->AddLine( segment_startpoint, segment_endpoint );
+        m_internalImporter.AddLine( segment_startpoint, segment_endpoint );
         segment_startpoint = segment_endpoint;
 
         updateImageLimits( segment_endpoint );
@@ -399,7 +401,7 @@ void DXF_IMPORT_PLUGIN::addPolyline(const DRW_Polyline& aData )
     // Polyline flags bit 0 indicates closed (1) or open (0) polyline
     if( aData.flags & 1 )
     {
-        m_importer->AddLine( segment_startpoint, polyline_startpoint );
+        m_internalImporter.AddLine( segment_startpoint, polyline_startpoint );
 
         updateImageLimits( segment_startpoint );
     }
@@ -512,7 +514,8 @@ void DXF_IMPORT_PLUGIN::addText( const DRW_Text& aData )
     double cosine = cos(angleInRads);
     double sine = sin(angleInRads);
 
-    m_importer->AddText( refPoint, text, textHeight, charWidth, angle, hJustify, vJustify );
+    m_internalImporter.AddText( refPoint, text, textHeight, charWidth, angle,
+            hJustify, vJustify );
 
     bottomLeft.x = bottomLeft.x * cosine - bottomLeft.y * sine;
     bottomLeft.y = bottomLeft.x * sine + bottomLeft.y * cosine;
@@ -660,7 +663,7 @@ void DXF_IMPORT_PLUGIN::addMText( const DRW_MText& aData )
     double cosine = cos(angleInRads);
     double sine = sin(angleInRads);
 
-    m_importer->AddText( textpos, text, textHeight, charWidth, angle, hJustify, vJustify );
+    m_internalImporter.AddText( textpos, text, textHeight, charWidth, angle, hJustify, vJustify );
 
     bottomLeft.x = bottomLeft.x * cosine - bottomLeft.y * sine;
     bottomLeft.y = bottomLeft.x * sine + bottomLeft.y * cosine;
